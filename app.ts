@@ -40,8 +40,6 @@ function calculatePrice(room: Room, request: Request): number {
   const total_price = (room.daily_rate * diff) + room.cleaning_fee ; 
 
   return total_price;
-
-  return 75
 }
 
 function updateReservations(request: Request, cheapestRoom: Room & { price: number }) {
@@ -72,9 +70,6 @@ function booked(room: Room, request: Request, reservations: Reservation[]): bool
   return !reservations.some(reservation => {
     reservation.room_id === room.id && 
     isOverlapping(request.checkin_date, request.checkout_date, reservation.checkin_date, reservation.checkout_date) 
-    // &&
-    // new Date(reservation.checkout_date) >= new Date(request.checkin_date) ||
-    // new Date(reservation.checkin_date) <= new Date(request.checkout_date)
   })
 }
 
