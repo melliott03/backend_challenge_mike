@@ -20,7 +20,6 @@ requests.forEach(request => {
       ...room
     }
   }).reduce((previous: Room & { price: number }, current: Room & { price: number } ) => current.price < previous.price ? current : previous);
-    // console.log('1st request.id, cheapestRoom, availableRooms::', request.id, cheapestRoom, availableRooms);
     updateReservations(request, cheapestRoom)
 
 });
