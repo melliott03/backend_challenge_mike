@@ -1,0 +1,20 @@
+{
+  "name": "fortress_backend_challenge",
+  "version": "1.0.0",
+  "description": "hotel booking",
+  "main": "book.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node --experimental-json-modules dist/app.js"
+  },
+  "author": "Michael Elliott",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^17.0.15"
+  },
+  "type": "module",
+  "dependencies": {
+    "moment": "^2.29.1",
+    "typescript": "^4.5.5"
+  }
+}
