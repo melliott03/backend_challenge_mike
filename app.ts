@@ -1,34 +1,55 @@
 import moment from 'moment';
 
-import requests from "./requests.json" assert {type: "json"};
-import rooms from "./rooms.json"  assert {type: "json"};
-import reservations from "./reservations.json"  assert {type: "json"};
+//use for npm start
+import requests from "./resources/requests.json" assert {type: "json"};
+import rooms from "./resources/rooms.json"  assert {type: "json"};
+import reservations from "./resources/reservations.json"  assert {type: "json"};
+
+//use for npm test
+// const requests = require('./resources/requests.json')
+// const rooms = require('./resources/rooms.json')
+// const reservations = require('./resources/reservations.json')
 
 interface Request { id: string; min_beds: number; is_smoker: boolean; checkin_date: string; checkout_date: string; }
 interface Room { id: string; num_beds: number; allow_smoking: boolean; daily_rate: number; cleaning_fee: number; }
 interface Reservation { room_id: string; checkin_date: string; checkout_date: string; total_charge: number; }
 
-requests.forEach(request => {
-  
-  let availableRooms = findAvailableRooms(request, rooms, reservations);
+export { createNewReservation
+  ,findAvailableRooms
+  ,calculatePrice
+  ,updateReservations
+  ,smoking 
+  ,beds 
+  ,isOverlapping 
+  ,notBooked 
+};
 
-  let cheapestRoom = availableRooms.map(room => {
-    const price = calculatePrice(room, request);
+createNewReservation()
 
-    return {
-      price,
-      ...room
-    }
-  }).reduce((previous: Room & { price: number }, current: Room & { price: number } ) => current.price < previous.price ? current : previous);
-    updateReservations(request, cheapestRoom)
+function createNewReservation() {
+  requests.forEach((request: any) => {
 
-});
+    let availableRooms = findAvailableRooms(request, rooms, reservations);
+
+    let cheapestRoom = availableRooms.map(room => {
+      const price = calculatePrice(room, request);
+
+      return {
+        price,
+        ...room
+      };
+    }).reduce((previous: Room & { price: number; }, current: Room & { price: number; }) => current.price < previous.price ? current : previous);
+    updateReservations(request, cheapestRoom);
+
+  });
+  console.log('reservations::',reservations)
+}
 
 function findAvailableRooms(request: Request, rooms: Room[], reservations: Reservation[]): Room[]{
   return rooms.filter(room =>
     smoking(room, request) &&
     beds(room, request) &&
-    booked(room, request, reservations)
+    notBooked(room, request, reservations)
   )
 }
 
@@ -51,6 +72,10 @@ function updateReservations(request: Request, cheapestRoom: Room & { price: numb
   }
 
   reservations.push(newReservation)
+
+  console.log('reservations.length::', reservations.length);
+  
+  return newReservation
 }
 
 function smoking(room: Room, request: Request): boolean {
@@ -62,15 +87,17 @@ function beds(room: Room, request: Request): boolean {
 }
 
 function isOverlapping(startDate1: string, endDate1: string, startDate2: string, endDate2: string){ 
-  return moment(startDate1).isSameOrBefore(endDate2) && 
-  moment(startDate2).isSameOrBefore(endDate1);
+
+  return moment(startDate1).isSameOrBefore(endDate2) && moment(startDate2).isSameOrBefore(endDate1);
+
 }
 
-function booked(room: Room, request: Request, reservations: Reservation[]): boolean {
-  return !reservations.some(reservation => {
-    reservation.room_id === room.id && 
-    isOverlapping(request.checkin_date, request.checkout_date, reservation.checkin_date, reservation.checkout_date) 
-  })
+function notBooked(room: Room, request: Request, reservations: Reservation[]): boolean {
+  return !reservations.some(reservation => 
+    reservation.room_id === room.id  && 
+    isOverlapping(request.checkin_date, request.checkout_date, reservation.checkin_date, reservation.checkout_date)
+  )
+
 }
 
-console.log(reservations)
+// console.timeEnd("runReserve")
